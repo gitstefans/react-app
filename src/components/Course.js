@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { read, insert, update, remove } from '../services/apiService';
 
 const Course = ({ match, history }) => {
+    const nameError = 'Name field is required!';
+    const pointsError = 'Points required!';
     const [id] = useState(match.params.id);
     const [course, setCourse] = useState({
         _id: '0',
@@ -24,21 +26,34 @@ const Course = ({ match, history }) => {
         });
     }
 
+    const validate = () => {
+        if(course.name === '') {
+            return false;
+        } 
+        if (course.points < 1) {
+            return false;
+        }
+        return true;
+    }
+
     const back = () => {
         history.push('/courses');
     }
 
     const save = () => {
-        if(id === '0') {
-            insert('courses', course, data => {
-                if(data) return history.push('/courses');
-                console.log('There was error during save data');
-            })
-        } else {
-            update('courses', id, course, data => {
-                if(data) return history.push('/courses');
-                console.log('There was error during save data'); 
-            })
+        let isValid = validate();
+        if(isValid){
+            if(id === '0') {
+                insert('courses', course, data => {
+                    if(data) return history.push('/courses');
+                    console.log('There was error during save data');
+                })
+            } else {
+                update('courses', id, course, data => {
+                    if(data) return history.push('/courses');
+                    console.log('There was error during save data'); 
+                })
+            }
         }
     }
 
@@ -58,6 +73,9 @@ const Course = ({ match, history }) => {
                            name='name'
                            value={course.name}
                            onChange={changeHandler}/>
+                    {course.name === '' ? <div 
+                        style={{ fontSize: 12, color: "red" }}>
+                            {nameError}</div> : null }
                 </div>
                 <div style={{margin: '12px 0'}}>
                     <label htmlFor='points'>Course points: </label>
@@ -65,6 +83,9 @@ const Course = ({ match, history }) => {
                            name='points'
                            value={course.points}
                            onChange={changeHandler} />
+                    {course.points < 1 && <div 
+                        style={{ fontSize: 12, color: "red" }}>
+                            {pointsError}</div>}
                 </div>
                 <hr />
                 {id !== '0' && (
